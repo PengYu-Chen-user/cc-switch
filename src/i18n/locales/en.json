@@ -914,7 +914,9 @@
     "opencode": "OpenCode",
     "openclaw": "OpenClaw",
     "hermes": "Hermes",
-    "pi": "Pi"
+    "pi": "Pi",
+    "kimicode": "Kimi Code",
+    "dsh": "DeepSeek Harness"
   },
   "pi": {
     "empty": {

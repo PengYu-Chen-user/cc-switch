@@ -5787,6 +5787,8 @@ impl ProviderService {
             AppType::OpenClaw => Self::extract_openclaw_common_config(&provider.settings_config),
             AppType::Hermes => Ok(String::new()), // Hermes doesn't use common config snippets
             AppType::Pi => Ok(String::new()),
+            AppType::Kimicode => Ok(String::new()),
+            AppType::Dsh => Ok(String::new()),
         }
     }
 
@@ -5805,6 +5807,8 @@ impl ProviderService {
             AppType::OpenClaw => Self::extract_openclaw_common_config(settings_config),
             AppType::Hermes => Ok(String::new()), // Hermes doesn't use common config snippets
             AppType::Pi => Ok(String::new()),
+            AppType::Kimicode => Ok(String::new()),
+            AppType::Dsh => Ok(String::new()),
         }
     }
 
@@ -6573,6 +6577,12 @@ impl ProviderService {
             AppType::Pi => {
                 crate::pi_config::validate_provider_node(&provider.id, &provider.settings_config)?;
             }
+            AppType::Kimicode => {
+                crate::kimicode_config::validate_kimicode_settings(&provider.settings_config)?;
+            }
+            AppType::Dsh => {
+                crate::dsh_config::validate_dsh_settings(&provider.settings_config)?;
+            }
         }
 
         // Validate and clean UsageScript configuration (common for all app types)
@@ -6777,7 +6787,7 @@ impl ProviderService {
 
                 Ok((api_key, base_url))
             }
-            AppType::OpenClaw | AppType::Hermes | AppType::Pi => {
+            AppType::OpenClaw | AppType::Hermes | AppType::Pi | AppType::Kimicode => {
                 // These native formats use apiKey and baseUrl directly on the object.
                 let api_key = provider
                     .settings_config
@@ -6795,6 +6805,30 @@ impl ProviderService {
                 let base_url = provider
                     .settings_config
                     .get("baseUrl")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string();
+
+                Ok((api_key, base_url))
+            }
+            AppType::Dsh => {
+                // DSH uses camelCase `apiKey` and `baseURL`.
+                let api_key = provider
+                    .settings_config
+                    .get("apiKey")
+                    .and_then(|v| v.as_str())
+                    .ok_or_else(|| {
+                        AppError::localized(
+                            "provider.dsh.api_key.missing",
+                            "缺少 API Key",
+                            "API key is missing",
+                        )
+                    })?
+                    .to_string();
+
+                let base_url = provider
+                    .settings_config
+                    .get("baseURL")
                     .and_then(|v| v.as_str())
                     .unwrap_or("")
                     .to_string();

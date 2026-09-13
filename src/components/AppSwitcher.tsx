@@ -37,6 +37,8 @@ const APP_ICON_NAME: Record<AppId, string> = {
   openclaw: "openclaw",
   hermes: "hermes",
   pi: "pi",
+  kimicode: "kimicode",
+  dsh: "dsh",
 };
 
 const APP_DISPLAY_NAME: Record<AppId, string> = {
@@ -49,6 +51,8 @@ const APP_DISPLAY_NAME: Record<AppId, string> = {
   openclaw: "OpenClaw",
   hermes: "Hermes",
   pi: "Pi",
+  kimicode: "Kimi Code",
+  dsh: "DeepSeek Harness",
 };
 
 /** 应用图标 + 角标（Claude Code / Desktop 用角标区分终端与桌面） */

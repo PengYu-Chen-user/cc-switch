@@ -11,12 +11,14 @@ mod commands;
 mod config;
 mod database;
 mod deeplink;
+mod dsh_config;
 mod error;
 mod gemini_config;
 mod gemini_mcp;
 mod grok_config;
 pub mod hermes_config;
 mod init_status;
+mod kimicode_config;
 mod lightweight;
 #[cfg(target_os = "linux")]
 mod linux_fix;
@@ -974,6 +976,14 @@ pub fn run() {
                     Ok(_) => log::debug!("○ No Hermes MCP servers found to import"),
                     Err(e) => log::warn!("✗ Failed to import Hermes MCP: {e}"),
                 }
+
+                match crate::services::mcp::McpService::import_from_kimicode(&app_state) {
+                    Ok(count) if count > 0 => {
+                        log::info!("✓ Imported {count} MCP server(s) from Kimi Code");
+                    }
+                    Ok(_) => log::debug!("○ No Kimi Code MCP servers found to import"),
+                    Err(e) => log::warn!("✗ Failed to import Kimi Code MCP: {e}"),
+                }
             }
 
             // 4. 导入提示词文件（表空时触发）
@@ -989,6 +999,8 @@ pub fn run() {
                     crate::app_config::AppType::OpenClaw,
                     crate::app_config::AppType::Hermes,
                     crate::app_config::AppType::Pi,
+                    crate::app_config::AppType::Kimicode,
+                    crate::app_config::AppType::Dsh,
                 ] {
                     match crate::services::prompt::PromptService::import_from_file_on_first_launch(
                         &app_state,

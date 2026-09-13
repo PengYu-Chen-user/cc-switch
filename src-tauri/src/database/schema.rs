@@ -67,7 +67,8 @@ impl Database {
             enabled_claude BOOLEAN NOT NULL DEFAULT 0, enabled_codex BOOLEAN NOT NULL DEFAULT 0,
             enabled_gemini BOOLEAN NOT NULL DEFAULT 0, enabled_grokbuild BOOLEAN NOT NULL DEFAULT 0,
             enabled_opencode BOOLEAN NOT NULL DEFAULT 0,
-            enabled_hermes BOOLEAN NOT NULL DEFAULT 0
+            enabled_hermes BOOLEAN NOT NULL DEFAULT 0,
+            enabled_kimicode BOOLEAN NOT NULL DEFAULT 0
         )",
             [],
         )
@@ -97,6 +98,8 @@ impl Database {
             enabled_grokbuild BOOLEAN NOT NULL DEFAULT 0,
             enabled_opencode BOOLEAN NOT NULL DEFAULT 0,
             enabled_hermes BOOLEAN NOT NULL DEFAULT 0,
+            enabled_kimicode BOOLEAN NOT NULL DEFAULT 0,
+            enabled_dsh BOOLEAN NOT NULL DEFAULT 0,
             installed_at INTEGER NOT NULL DEFAULT 0,
             content_hash TEXT,
             updated_at INTEGER NOT NULL DEFAULT 0
@@ -548,6 +551,11 @@ impl Database {
                         log::info!("迁移数据库从 v17 到 v18（会话日志字节游标列）");
                         Self::migrate_v17_to_v18(conn)?;
                         Self::set_user_version(conn, 18)?;
+                    }
+                    18 => {
+                        log::info!("迁移数据库从 v18 到 v19（Skills/MCP 添加 Kimi Code / DSH 支持）");
+                        Self::migrate_v18_to_v19(conn)?;
+                        Self::set_user_version(conn, 19)?;
                     }
                     _ => {
                         return Err(AppError::Database(format!(
@@ -1594,6 +1602,33 @@ impl Database {
                 "session_log_sync",
                 "last_tail_fingerprint",
                 "INTEGER",
+            )?;
+        }
+        Ok(())
+    }
+
+    /// v18 -> v19: add Kimi Code / DeepSeek Harness MCP and Skills flags.
+    fn migrate_v18_to_v19(conn: &Connection) -> Result<(), AppError> {
+        if Self::table_exists(conn, "mcp_servers")? {
+            Self::add_column_if_missing(
+                conn,
+                "mcp_servers",
+                "enabled_kimicode",
+                "BOOLEAN NOT NULL DEFAULT 0",
+            )?;
+        }
+        if Self::table_exists(conn, "skills")? {
+            Self::add_column_if_missing(
+                conn,
+                "skills",
+                "enabled_kimicode",
+                "BOOLEAN NOT NULL DEFAULT 0",
+            )?;
+            Self::add_column_if_missing(
+                conn,
+                "skills",
+                "enabled_dsh",
+                "BOOLEAN NOT NULL DEFAULT 0",
             )?;
         }
         Ok(())

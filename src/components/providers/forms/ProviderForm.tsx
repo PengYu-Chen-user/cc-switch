@@ -131,6 +131,37 @@ import { useOpenClawLiveProviderIds } from "@/hooks/useOpenClaw";
 import { useHermesLiveProviderIds } from "@/hooks/useHermes";
 import { resolveCodexOfficialIdentity } from "@/utils/providerCapabilities";
 
+/** Default editor template for a Kimi Code CLI provider (structured fields). */
+const KIMICODE_DEFAULT_CONFIG = JSON.stringify(
+  {
+    providerKey: "moonshot",
+    type: "kimi",
+    baseUrl: "https://api.moonshot.ai/v1",
+    apiKey: "",
+    modelAlias: "kimi-code/kimi-for-coding",
+    modelId: "kimi-for-coding",
+    maxContextSize: 262144,
+  },
+  null,
+  2,
+);
+
+/** Default editor template for a DeepSeek Harness (dsh) provider route. */
+const DSH_DEFAULT_CONFIG = JSON.stringify(
+  {
+    providerId: "moonshotai",
+    displayName: "",
+    api: "openai-completions",
+    baseURL: "https://api.moonshot.ai/v1",
+    apiKeyEnv: "MOONSHOT_API_KEY",
+    apiKey: "",
+    models: [{ id: "kimi-k2", name: "Kimi K2", contextWindow: 262144 }],
+    defaultModel: "kimi-k2",
+  },
+  null,
+  2,
+);
+
 type PresetEntry = {
   id: string;
   preset:
@@ -451,7 +482,11 @@ function ProviderFormFull({
                 ? OPENCLAW_DEFAULT_CONFIG
                 : appId === "hermes"
                   ? HERMES_DEFAULT_CONFIG
-                  : CLAUDE_DEFAULT_CONFIG,
+                  : appId === "kimicode"
+                    ? KIMICODE_DEFAULT_CONFIG
+                    : appId === "dsh"
+                      ? DSH_DEFAULT_CONFIG
+                      : CLAUDE_DEFAULT_CONFIG,
       icon: initialData?.icon ?? "",
       iconColor: initialData?.iconColor ?? "",
     }),
@@ -774,6 +809,9 @@ function ProviderFormFull({
         id: `hermes-${index}`,
         preset,
       }));
+    } else if (appId === "kimicode" || appId === "dsh") {
+      // Kimi Code / DSH providers are configured from the raw settings JSON.
+      return [];
     }
     return providerPresets
       .filter((p) => !p.hidden)
@@ -2717,7 +2755,10 @@ function ProviderFormFull({
               </div>
               {settingsConfigErrorField}
             </>
-          ) : appId === "openclaw" || appId === "hermes" ? (
+          ) : appId === "openclaw" ||
+            appId === "hermes" ||
+            appId === "kimicode" ||
+            appId === "dsh" ? (
             <>
               <div className="space-y-2">
                 <Label htmlFor="settingsConfig">
@@ -2733,7 +2774,28 @@ function ProviderFormFull({
   "base_url": "https://api.example.com/v1",
   "api_key": ""
 }`
-                      : `{
+                      : appId === "kimicode"
+                        ? `{
+  "providerKey": "moonshot",
+  "type": "kimi",
+  "baseUrl": "https://api.moonshot.ai/v1",
+  "apiKey": "your-api-key-here",
+  "modelAlias": "kimi-code/kimi-for-coding",
+  "modelId": "kimi-for-coding",
+  "maxContextSize": 262144
+}`
+                        : appId === "dsh"
+                          ? `{
+  "providerId": "moonshotai",
+  "displayName": "Moonshot AI",
+  "api": "openai-completions",
+  "baseURL": "https://api.moonshot.ai/v1",
+  "apiKeyEnv": "MOONSHOT_API_KEY",
+  "apiKey": "your-api-key-here",
+  "models": [{ "id": "kimi-k2", "name": "Kimi K2", "contextWindow": 262144 }],
+  "defaultModel": "kimi-k2"
+}`
+                          : `{
   "baseUrl": "https://api.example.com/v1",
   "apiKey": "your-api-key-here",
   "api": "openai-completions",

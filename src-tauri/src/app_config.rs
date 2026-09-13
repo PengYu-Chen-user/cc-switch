@@ -19,6 +19,8 @@ pub struct McpApps {
     pub opencode: bool,
     #[serde(default)]
     pub hermes: bool,
+    #[serde(default)]
+    pub kimicode: bool,
 }
 
 impl McpApps {
@@ -32,6 +34,8 @@ impl McpApps {
             AppType::OpenCode => self.opencode,
             AppType::OpenClaw => false, // OpenClaw doesn't support MCP
             AppType::Hermes => self.hermes,
+            AppType::Kimicode => self.kimicode,
+            AppType::Dsh => false, // DSH MCP uses an unstable patch format; not synced yet
             AppType::Pi => false, // Pi core has no native MCP registry.
             AppType::ClaudeDesktop => false,
         }
@@ -47,6 +51,8 @@ impl McpApps {
             AppType::OpenCode => self.opencode = enabled,
             AppType::OpenClaw => {} // OpenClaw doesn't support MCP, ignore
             AppType::Hermes => self.hermes = enabled,
+            AppType::Kimicode => self.kimicode = enabled,
+            AppType::Dsh => {} // DSH MCP not synced yet (unstable patch format)
             AppType::Pi => {}            // Pi core has no native MCP registry.
             AppType::ClaudeDesktop => {} // Claude Desktop 3P provider config doesn't support MCP here
         }
@@ -73,6 +79,9 @@ impl McpApps {
         if self.hermes {
             apps.push(AppType::Hermes);
         }
+        if self.kimicode {
+            apps.push(AppType::Kimicode);
+        }
         apps
     }
 
@@ -84,6 +93,7 @@ impl McpApps {
             && !self.grokbuild
             && !self.opencode
             && !self.hermes
+            && !self.kimicode
     }
 }
 
@@ -104,6 +114,10 @@ pub struct SkillApps {
     pub hermes: bool,
     #[serde(default)]
     pub pi: bool,
+    #[serde(default)]
+    pub kimicode: bool,
+    #[serde(default)]
+    pub dsh: bool,
 }
 
 impl SkillApps {
@@ -117,6 +131,8 @@ impl SkillApps {
             AppType::OpenCode => self.opencode,
             AppType::Hermes => self.hermes,
             AppType::Pi => self.pi,
+            AppType::Kimicode => self.kimicode,
+            AppType::Dsh => self.dsh,
             AppType::OpenClaw => false, // OpenClaw doesn't support Skills
             AppType::ClaudeDesktop => false,
         }
@@ -132,6 +148,8 @@ impl SkillApps {
             AppType::OpenCode => self.opencode = enabled,
             AppType::Hermes => self.hermes = enabled,
             AppType::Pi => self.pi = enabled,
+            AppType::Kimicode => self.kimicode = enabled,
+            AppType::Dsh => self.dsh = enabled,
             AppType::OpenClaw => {} // OpenClaw doesn't support Skills, ignore
             AppType::ClaudeDesktop => {} // Claude Desktop 3P profiles don't use CC Switch skill sync
         }
@@ -161,6 +179,12 @@ impl SkillApps {
         if self.pi {
             apps.push(AppType::Pi);
         }
+        if self.kimicode {
+            apps.push(AppType::Kimicode);
+        }
+        if self.dsh {
+            apps.push(AppType::Dsh);
+        }
         apps
     }
 
@@ -173,6 +197,8 @@ impl SkillApps {
             && !self.opencode
             && !self.hermes
             && !self.pi
+            && !self.kimicode
+            && !self.dsh
     }
 
     /// 仅启用指定应用（其他应用设为禁用）
@@ -392,6 +418,8 @@ pub enum AppType {
     OpenClaw,
     Hermes,
     Pi,
+    Kimicode,
+    Dsh,
 }
 
 impl AppType {
@@ -406,6 +434,8 @@ impl AppType {
             AppType::OpenClaw => "openclaw",
             AppType::Hermes => "hermes",
             AppType::Pi => "pi",
+            AppType::Kimicode => "kimicode",
+            AppType::Dsh => "dsh",
         }
     }
 
@@ -440,6 +470,8 @@ impl AppType {
             AppType::OpenClaw,
             AppType::Hermes,
             AppType::Pi,
+            AppType::Kimicode,
+            AppType::Dsh,
         ]
         .into_iter()
     }
@@ -460,10 +492,12 @@ impl FromStr for AppType {
             "openclaw" => Ok(AppType::OpenClaw),
             "hermes" => Ok(AppType::Hermes),
             "pi" => Ok(AppType::Pi),
+            "kimicode" | "kimi-code" | "kimi_code" | "kimi" => Ok(AppType::Kimicode),
+            "dsh" | "deepseek-harness" | "deepseek_harness" => Ok(AppType::Dsh),
             other => Err(AppError::localized(
                 "unsupported_app",
-                format!("不支持的应用标识: '{other}'。可选值: claude, claude-desktop, codex, gemini, grokbuild, opencode, openclaw, hermes, pi。"),
-                format!("Unsupported app id: '{other}'. Allowed: claude, claude-desktop, codex, gemini, grokbuild, opencode, openclaw, hermes, pi."),
+                format!("不支持的应用标识: '{other}'。可选值: claude, claude-desktop, codex, gemini, grokbuild, opencode, openclaw, hermes, pi, kimicode, dsh。"),
+                format!("Unsupported app id: '{other}'. Allowed: claude, claude-desktop, codex, gemini, grokbuild, opencode, openclaw, hermes, pi, kimicode, dsh."),
             )),
         }
     }
@@ -503,6 +537,8 @@ impl CommonConfigSnippets {
             AppType::OpenCode => self.opencode.as_ref(),
             AppType::OpenClaw => self.openclaw.as_ref(),
             AppType::Hermes => self.hermes.as_ref(),
+            AppType::Kimicode => None,
+            AppType::Dsh => None,
             AppType::Pi => None,
         }
     }
@@ -518,6 +554,8 @@ impl CommonConfigSnippets {
             AppType::OpenCode => self.opencode = snippet,
             AppType::OpenClaw => self.openclaw = snippet,
             AppType::Hermes => self.hermes = snippet,
+            AppType::Kimicode => {}
+            AppType::Dsh => {}
             AppType::Pi => {}
         }
     }
@@ -563,6 +601,8 @@ impl Default for MultiAppConfig {
         apps.insert("opencode".to_string(), ProviderManager::default());
         apps.insert("openclaw".to_string(), ProviderManager::default());
         apps.insert("hermes".to_string(), ProviderManager::default());
+        apps.insert("kimicode".to_string(), ProviderManager::default());
+        apps.insert("dsh".to_string(), ProviderManager::default());
 
         Self {
             version: 2,
@@ -845,6 +885,8 @@ impl MultiAppConfig {
             // Pi was added after prompts moved to SQLite. Keeping it out of
             // this legacy config avoids a second, unused prompt state.
             AppType::Pi => return Ok(false),
+            // Kimicode / Dsh were added after prompts moved to SQLite as well.
+            AppType::Kimicode | AppType::Dsh => return Ok(false),
         };
 
         prompts.insert(id, prompt);
@@ -889,6 +931,8 @@ impl MultiAppConfig {
                 AppType::OpenClaw => continue, // OpenClaw MCP is still in development, skip
                 AppType::Hermes => continue,   // Hermes didn't exist in v3.6.x, skip
                 AppType::Pi => continue,       // Pi didn't exist in v3.6.x, skip
+                AppType::Kimicode => continue, // Kimicode didn't exist in v3.6.x, skip
+                AppType::Dsh => continue,      // Dsh didn't exist in v3.6.x, skip
             };
 
             for (id, entry) in old_servers {

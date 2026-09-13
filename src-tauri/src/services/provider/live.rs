@@ -531,6 +531,8 @@ fn settings_contain_common_config(app_type: &AppType, settings: &Value, snippet:
         | AppType::OpenClaw
         | AppType::Hermes
         | AppType::Pi
+        | AppType::Kimicode
+        | AppType::Dsh
         | AppType::ClaudeDesktop => false,
     }
 }
@@ -606,6 +608,8 @@ pub(crate) fn remove_common_config_from_settings(
         | AppType::OpenClaw
         | AppType::Hermes
         | AppType::Pi
+        | AppType::Kimicode
+        | AppType::Dsh
         | AppType::ClaudeDesktop => Ok(settings.clone()),
     }
 }
@@ -666,6 +670,8 @@ fn apply_common_config_to_settings(
         | AppType::OpenClaw
         | AppType::Hermes
         | AppType::Pi
+        | AppType::Kimicode
+        | AppType::Dsh
         | AppType::ClaudeDesktop => Ok(settings.clone()),
     }
 }
@@ -1326,6 +1332,12 @@ pub(crate) fn write_live_snapshot(app_type: &AppType, provider: &Provider) -> Re
         AppType::GrokBuild => {
             crate::grok_config::write_grok_provider_live(provider)?;
         }
+        AppType::Kimicode => {
+            crate::kimicode_config::write_kimicode_provider_live(provider)?;
+        }
+        AppType::Dsh => {
+            crate::dsh_config::write_dsh_provider_live(provider)?;
+        }
         AppType::OpenCode => {
             // OpenCode uses additive mode - write provider to config
             use crate::opencode_config;
@@ -1787,6 +1799,8 @@ pub fn read_live_settings(app_type: AppType) -> Result<Value, AppError> {
             Ok(config)
         }
         AppType::GrokBuild => crate::grok_config::read_grok_live_settings(),
+        AppType::Kimicode => crate::kimicode_config::read_kimicode_live_settings(),
+        AppType::Dsh => crate::dsh_config::read_dsh_live_settings(),
         AppType::OpenClaw => {
             use crate::openclaw_config::{get_openclaw_config_path, read_openclaw_config};
 
@@ -1927,6 +1941,8 @@ pub fn import_default_config(state: &AppState, app_type: AppType) -> Result<bool
             })
         }
         // OpenCode, OpenClaw and Hermes use additive mode and are handled by early return above
+        AppType::Kimicode => crate::kimicode_config::read_kimicode_live_settings()?,
+        AppType::Dsh => crate::dsh_config::read_dsh_live_settings()?,
         AppType::OpenCode | AppType::OpenClaw | AppType::Hermes | AppType::Pi => {
             unreachable!("additive mode apps are handled by early return")
         }

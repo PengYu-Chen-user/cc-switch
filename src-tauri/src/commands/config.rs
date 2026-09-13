@@ -146,6 +146,22 @@ pub async fn get_config_status(
                 path,
             })
         }
+        AppType::Kimicode => {
+            let config_path = crate::kimicode_config::get_kimicode_config_path();
+            let exists = config_path.exists();
+            let path = crate::kimicode_config::get_kimicode_dir()
+                .to_string_lossy()
+                .to_string();
+            Ok(ConfigStatus { exists, path })
+        }
+        AppType::Dsh => {
+            let config_path = crate::dsh_config::get_dsh_settings_path();
+            let exists = config_path.exists();
+            let path = crate::dsh_config::get_dsh_dir()
+                .to_string_lossy()
+                .to_string();
+            Ok(ConfigStatus { exists, path })
+        }
     }
 }
 
@@ -168,6 +184,8 @@ pub async fn get_config_dir(app: String) -> Result<String, String> {
         AppType::OpenClaw => crate::openclaw_config::get_openclaw_dir(),
         AppType::Hermes => crate::hermes_config::get_hermes_dir(),
         AppType::Pi => crate::pi_config::get_pi_agent_dir().map_err(|e| e.to_string())?,
+        AppType::Kimicode => crate::kimicode_config::get_kimicode_dir(),
+        AppType::Dsh => crate::dsh_config::get_dsh_dir(),
     };
 
     Ok(dir.to_string_lossy().to_string())
@@ -187,6 +205,8 @@ pub async fn open_config_folder(handle: AppHandle, app: String) -> Result<bool, 
         AppType::OpenClaw => crate::openclaw_config::get_openclaw_dir(),
         AppType::Hermes => crate::hermes_config::get_hermes_dir(),
         AppType::Pi => crate::pi_config::get_pi_agent_dir().map_err(|e| e.to_string())?,
+        AppType::Kimicode => crate::kimicode_config::get_kimicode_dir(),
+        AppType::Dsh => crate::dsh_config::get_dsh_dir(),
     };
 
     if !config_dir.exists() {

@@ -152,6 +152,8 @@ pub(crate) fn build_provider_from_request(
         AppType::OpenCode => build_opencode_settings(request),
         AppType::OpenClaw => build_additive_app_settings(request),
         AppType::Hermes => build_hermes_settings(request),
+        AppType::Kimicode => build_kimicode_settings(request),
+        AppType::Dsh => build_dsh_settings(request),
         AppType::Pi => {
             return Err(AppError::InvalidInput(
                 "Pi providers must be added from the Pi provider page".to_string(),
@@ -588,7 +590,55 @@ fn build_hermes_settings(request: &DeepLinkImportRequest) -> serde_json::Value {
     json!(config)
 }
 
-// =============================================================================
+/// Build Kimi Code CLI provider settings (structured provider + model alias).
+fn build_kimicode_settings(request: &DeepLinkImportRequest) -> serde_json::Value {
+    let endpoint = get_primary_endpoint(request).trim().to_string();
+    let api_key = request.api_key.as_deref().unwrap_or("").trim().to_string();
+    let model = request
+        .model
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .unwrap_or("kimi-for-coding")
+        .to_string();
+
+    json!({
+        "providerKey": "deeplink",
+        "type": "kimi",
+        "baseUrl": endpoint,
+        "apiKey": api_key,
+        "modelAlias": format!("deeplink/{model}"),
+        "modelId": model,
+        "maxContextSize": crate::kimicode_config::DEFAULT_MAX_CONTEXT_SIZE,
+    })
+}
+
+/// Build DeepSeek Harness provider settings (llm-pi-ai route + default model).
+fn build_dsh_settings(request: &DeepLinkImportRequest) -> serde_json::Value {
+    let endpoint = get_primary_endpoint(request).trim().to_string();
+    let api_key = request.api_key.as_deref().unwrap_or("").trim().to_string();
+    let model = request
+        .model
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .unwrap_or("deepseek-flash")
+        .to_string();
+    let display_name = request.name.clone().unwrap_or_default();
+
+    json!({
+        "providerId": "deeplink",
+        "displayName": display_name,
+        "api": "openai-completions",
+        "baseURL": endpoint,
+        "apiKeyEnv": "DSH_DEEPLINK_API_KEY",
+        "apiKey": api_key,
+        "models": [{ "id": model, "name": model }],
+        "defaultModel": model,
+    })
+}
+
+// ===========================================================================
 // Config Merge Logic
 // =============================================================================
 

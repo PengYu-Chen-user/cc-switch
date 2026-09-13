@@ -230,6 +230,16 @@ impl Provider {
                     str_at(options.and_then(|o| o.get("apiKey"))),
                 )
             }
+            // Kimi Code CLI providers keep base_url/api_key flat in the stored shape.
+            AppType::Kimicode => (
+                str_at(settings.get("baseUrl")),
+                str_at(settings.get("apiKey")),
+            ),
+            // DeepSeek Harness providers keep `baseURL`/`apiKey` flat (camelCase URL).
+            AppType::Dsh => (
+                str_at(settings.get("baseURL")),
+                str_at(settings.get("apiKey")),
+            ),
             // Claude and Claude Desktop both use the Anthropic-style env map, keeping
             // the OpenRouter/Google key fallbacks the JS-script path relies on.
             // Listed explicitly (not `_`) so a new AppType fails to compile here.

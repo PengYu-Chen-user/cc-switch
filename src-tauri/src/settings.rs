@@ -48,6 +48,10 @@ pub struct VisibleApps {
     pub hermes: bool,
     #[serde(default = "default_true")]
     pub pi: bool,
+    #[serde(default = "default_true")]
+    pub kimicode: bool,
+    #[serde(default = "default_true")]
+    pub dsh: bool,
 }
 
 impl Default for VisibleApps {
@@ -62,6 +66,8 @@ impl Default for VisibleApps {
             openclaw: true,
             hermes: false, // 默认不显示，需用户手动启用
             pi: true,
+            kimicode: true,
+            dsh: true,
         }
     }
 }
@@ -79,6 +85,8 @@ impl VisibleApps {
             AppType::OpenClaw => self.openclaw,
             AppType::Hermes => self.hermes,
             AppType::Pi => self.pi,
+            AppType::Kimicode => self.kimicode,
+            AppType::Dsh => self.dsh,
         }
     }
 }
@@ -433,6 +441,10 @@ pub struct AppSettings {
     pub hermes_config_dir: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pi_config_dir: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kimicode_config_dir: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dsh_config_dir: Option<String>,
 
     // ===== 当前供应商 ID（设备级）=====
     /// 当前 Claude 供应商 ID（本地存储，优先于数据库 is_current）
@@ -459,6 +471,12 @@ pub struct AppSettings {
     /// 当前 Hermes 供应商 ID（本地存储，保持结构一致）
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub current_provider_hermes: Option<String>,
+    /// 当前 Kimi Code 供应商 ID（本地存储，优先于数据库 is_current）
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub current_provider_kimicode: Option<String>,
+    /// 当前 DeepSeek Harness 供应商 ID（本地存储，优先于数据库 is_current）
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub current_provider_dsh: Option<String>,
 
     // ===== Skill 同步设置 =====
     /// Skill 同步方式：auto（默认，优先 symlink）、symlink、copy
@@ -550,6 +568,8 @@ impl Default for AppSettings {
             openclaw_config_dir: None,
             hermes_config_dir: None,
             pi_config_dir: None,
+            kimicode_config_dir: None,
+            dsh_config_dir: None,
             current_provider_claude: None,
             current_provider_claude_desktop: None,
             current_provider_codex: None,
@@ -558,6 +578,8 @@ impl Default for AppSettings {
             current_provider_opencode: None,
             current_provider_openclaw: None,
             current_provider_hermes: None,
+            current_provider_kimicode: None,
+            current_provider_dsh: None,
             skill_sync_method: SyncMethod::default(),
             skill_storage_location: SkillStorageLocation::default(),
             webdav_sync: None,
@@ -633,6 +655,20 @@ impl AppSettings {
 
         self.pi_config_dir = self
             .pi_config_dir
+            .as_ref()
+            .map(|s| s.trim())
+            .filter(|s| !s.is_empty())
+            .map(|s| s.to_string());
+
+        self.kimicode_config_dir = self
+            .kimicode_config_dir
+            .as_ref()
+            .map(|s| s.trim())
+            .filter(|s| !s.is_empty())
+            .map(|s| s.to_string());
+
+        self.dsh_config_dir = self
+            .dsh_config_dir
             .as_ref()
             .map(|s| s.trim())
             .filter(|s| !s.is_empty())
@@ -972,6 +1008,22 @@ pub fn get_pi_override_dir() -> Option<PathBuf> {
         .map(|path| resolve_override_path(path))
 }
 
+pub fn get_kimicode_override_dir() -> Option<PathBuf> {
+    let settings = settings_store().read().ok()?;
+    settings
+        .kimicode_config_dir
+        .as_ref()
+        .map(|path| resolve_override_path(path))
+}
+
+pub fn get_dsh_override_dir() -> Option<PathBuf> {
+    let settings = settings_store().read().ok()?;
+    settings
+        .dsh_config_dir
+        .as_ref()
+        .map(|path| resolve_override_path(path))
+}
+
 pub fn preserve_codex_official_auth_on_switch() -> bool {
     settings_store()
         .read()
@@ -1009,6 +1061,8 @@ pub fn get_current_provider(app_type: &AppType) -> Option<String> {
         AppType::OpenCode => settings.current_provider_opencode.clone(),
         AppType::OpenClaw => settings.current_provider_openclaw.clone(),
         AppType::Hermes => settings.current_provider_hermes.clone(),
+        AppType::Kimicode => settings.current_provider_kimicode.clone(),
+        AppType::Dsh => settings.current_provider_dsh.clone(),
         AppType::Pi => None,
     }
 }
@@ -1028,6 +1082,8 @@ pub fn set_current_provider(app_type: &AppType, id: Option<&str>) -> Result<(), 
         AppType::OpenCode => settings.current_provider_opencode = id_owned.clone(),
         AppType::OpenClaw => settings.current_provider_openclaw = id_owned.clone(),
         AppType::Hermes => settings.current_provider_hermes = id_owned.clone(),
+        AppType::Kimicode => settings.current_provider_kimicode = id_owned.clone(),
+        AppType::Dsh => settings.current_provider_dsh = id_owned.clone(),
         AppType::Pi => {}
     })
 }
