@@ -2,7 +2,9 @@
 
 # CC Switch
 
-### The All-in-One Manager for Claude Code, Claude Desktop, Codex, Gemini CLI, Grok Build, OpenCode, OpenClaw & Hermes Agent
+### The All-in-One Manager for Claude Code, Claude Desktop, Codex, Gemini CLI, Grok Build, OpenCode, OpenClaw, Hermes Agent, Kimi Code CLI & DeepSeek Harness
+
+> **This fork** adds first-class support for **Kimi Code CLI** (`kimicode`, Moonshot AI) and **DeepSeek Harness** (`dsh`, DeepSeek AI) on top of upstream CC Switch.
 
 [![Version](https://img.shields.io/github/v/release/farion1231/cc-switch?color=blue&label=version)](https://github.com/farion1231/cc-switch/releases)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/farion1231/cc-switch/releases)
@@ -207,17 +209,44 @@ TeamoRouter also offers enterprise features including centralized billing, team 
 
 ## Why CC Switch?
 
-Modern AI-powered coding relies on tools like Claude Code, Claude Desktop, Codex, Gemini CLI, Grok Build, OpenCode, OpenClaw, and Hermes — but each has its own configuration format. Switching API providers means manually editing JSON, TOML, or `.env` files, and there is no unified way to manage MCP and Skills across multiple tools.
+Modern AI-powered coding relies on tools like Claude Code, Claude Desktop, Codex, Gemini CLI, Grok Build, OpenCode, OpenClaw, Hermes, Kimi Code CLI, and DeepSeek Harness — but each has its own configuration format. Switching API providers means manually editing JSON, TOML, or `.env` files, and there is no unified way to manage MCP and Skills across multiple tools.
 
 **CC Switch** gives you a single desktop app to manage all supported AI tools. Instead of editing config files by hand, you get a visual interface to import providers with one click, switch between them instantly, with 50+ built-in provider presets, unified MCP and Skills management, and system tray quick switching — all backed by a reliable SQLite database with atomic writes that protect your configs from corruption.
 
-- **One App, Eight Tools** — Manage Claude Code, Claude Desktop, Codex, Gemini CLI, Grok Build, OpenCode, OpenClaw, and Hermes from a single interface
+- **One App, Ten Tools** — Manage Claude Code, Claude Desktop, Codex, Gemini CLI, Grok Build, OpenCode, OpenClaw, Hermes, Kimi Code CLI, and DeepSeek Harness from a single interface
 - **No More Manual Editing** — 50+ provider presets including AWS Bedrock, NVIDIA NIM, and community relays; just pick and switch
-- **Unified MCP & Skills Management** — One panel to manage MCP servers and Skills across Claude, Codex, Gemini, Grok Build, OpenCode, and Hermes with bidirectional sync
+- **Unified MCP & Skills Management** — One panel to manage MCP servers and Skills across Claude, Codex, Gemini, Grok Build, OpenCode, Hermes, and Kimi Code with bidirectional sync
 - **System Tray Quick Switch** — Switch providers instantly from the tray menu, no need to open the full app
 - **Cloud Sync** — Sync provider data across devices via Dropbox, OneDrive, iCloud, or WebDAV servers
 - **Cross-Platform** — Native desktop app for Windows, macOS, and Linux, built with Tauri 2
 - **Built-in Utilities** — Includes various utilities for first-launch login confirmation, signature bypass, plugin extension sync, and more
+
+## Added in This Fork
+
+This fork extends upstream with two additional tools, both managed in **switch mode** (pick a provider → it becomes the default model):
+
+### Kimi Code CLI (`kimicode`)
+
+Moonshot AI's terminal coding agent (`kimi`, npm `@moonshot-ai/kimi-code`).
+
+- **Provider config**: `~/.kimi-code/config.toml` (or `$KIMI_CODE_HOME/config.toml`). CC Switch writes `[providers.<key>]` + `[models."<alias>"]` and sets `default_model`, merging non-destructively so `thinking`, `loop_control`, and OAuth-managed providers are preserved.
+- **Provider types**: `kimi`, `anthropic`, `openai`, `openai_responses`.
+- **MCP**: servers are synced to `~/.kimi-code/mcp.json` (`mcpServers`).
+- **Skills / Prompts**: `~/.kimi-code/skills/`, `~/.kimi-code/AGENTS.md`.
+- **Sessions**: browse/restore sessions from `~/.kimi-code/sessions/`.
+
+### DeepSeek Harness (`dsh`)
+
+DeepSeek AI's plugin-based agent harness (`dsh`, npm `@deepseek-ai/dsh`).
+
+- **Provider config**: `~/.dsh/settings.yaml` (or `$DSH_HOME/settings.yaml`). CC Switch writes `llm-pi-ai.providers.<id>` and selects it via `agent-default-model`.
+- **Credentials**: the API key is written to `~/.dsh/.credentials.yaml` under `refs.<apiKeyEnv>`; `settings.yaml` only holds the reference.
+- **Protocols**: `openai-completions`, `openai-responses`, `anthropic-messages`.
+- **Skills / Prompts**: `~/.dsh/skills/`, `~/.dsh/AGENTS.md`.
+- **Sessions**: browse sessions from `~/.dsh/sessions/` (JSONL, zstd-aware).
+- **MCP**: deferred — DSH's MCP wiring uses an unstable Cordis patch format, so the app is registered but not yet projected.
+
+DB schema migration v19 adds the `enabled_kimicode` / `enabled_dsh` sync flags automatically on first launch.
 
 ## Screenshots
 
@@ -231,7 +260,7 @@ Modern AI-powered coding relies on tools like Claude Code, Claude Desktop, Codex
 
 ### Provider Management
 
-- **8 supported tools, 50+ presets** — Claude Code, Claude Desktop, Codex, Gemini CLI, Grok Build, OpenCode, OpenClaw, Hermes; copy your key and import with one click
+- **10 supported tools, 50+ presets** — Claude Code, Claude Desktop, Codex, Gemini CLI, Grok Build, OpenCode, OpenClaw, Hermes, Kimi Code CLI, DeepSeek Harness; copy your key and import with one click
 - **Universal providers** — One config syncs to Claude Code, Codex, and Gemini CLI
 - One-click switching, system tray quick access, drag-and-drop sorting, import/export
 
@@ -242,7 +271,7 @@ Modern AI-powered coding relies on tools like Claude Code, Claude Desktop, Codex
 
 ### MCP, Prompts & Skills
 
-- **Unified MCP panel** — Manage MCP servers across Claude, Codex, Gemini, Grok Build, OpenCode, and Hermes with bidirectional sync and Deep Link import
+- **Unified MCP panel** — Manage MCP servers across Claude, Codex, Gemini, Grok Build, OpenCode, Hermes, and Kimi Code with bidirectional sync and Deep Link import
 - **Prompts** — Markdown editor with cross-app sync (CLAUDE.md / AGENTS.md / GEMINI.md) and backfill protection
 - **Skills** — One-click install from GitHub repos or ZIP files, custom repository management, with symlink and file copy support
 
@@ -266,7 +295,7 @@ Modern AI-powered coding relies on tools like Claude Code, Claude Desktop, Codex
 <details>
 <summary><strong>Which AI tools does CC Switch support?</strong></summary>
 
-CC Switch supports eight tools: **Claude Code**, **Claude Desktop**, **Codex**, **Gemini CLI**, **Grok Build**, **OpenCode**, **OpenClaw**, and **Hermes**. Each tool has dedicated provider presets and configuration management.
+CC Switch supports ten tools: **Claude Code**, **Claude Desktop**, **Codex**, **Gemini CLI**, **Grok Build**, **OpenCode**, **OpenClaw**, **Hermes**, **Kimi Code CLI** (`kimicode`), and **DeepSeek Harness** (`dsh`). Each tool has dedicated provider presets and configuration management.
 
 </details>
 

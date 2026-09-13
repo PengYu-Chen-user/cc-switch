@@ -2,7 +2,9 @@
 
 # CC Switch
 
-### Claude Code、Claude Desktop、Codex、Gemini CLI、Grok Build、OpenCode、OpenClaw、Hermes Agent のオールインワン管理ツール
+### Claude Code、Claude Desktop、Codex、Gemini CLI、Grok Build、OpenCode、OpenClaw、Hermes Agent、Kimi Code CLI、DeepSeek Harness のオールインワン管理ツール
+
+> **本フォーク**は、上流の CC Switch に **Kimi Code CLI**（`kimicode`、Moonshot AI）と **DeepSeek Harness**（`dsh`、DeepSeek AI）のファーストクラス対応を追加します。
 
 [![Version](https://img.shields.io/github/v/release/farion1231/cc-switch?color=blue&label=version)](https://github.com/farion1231/cc-switch/releases)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/farion1231/cc-switch/releases)

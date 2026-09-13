@@ -1,6 +1,6 @@
 # CC Switch 用户手册
 
-> Claude Code / Claude Desktop / Codex / Gemini CLI / OpenCode / OpenClaw / Hermes 全方位辅助工具
+> Claude Code / Claude Desktop / Codex / Gemini CLI / OpenCode / OpenClaw / Hermes / Kimi Code CLI / DeepSeek Harness 全方位辅助工具
 
 ## 目录结构
 
@@ -20,7 +20,8 @@
 │   ├── 2.3 编辑供应商
 │   ├── 2.4 排序与复制
 │   ├── 2.5 用量查询
-│   └── 2.6 Claude Desktop
+│   ├── 2.6 Claude Desktop
+│   └── 2.7 Kimi Code CLI 与 DeepSeek Harness
 │
 ├── 3. 扩展功能
 │   ├── 3.1 MCP 服务器管理
@@ -65,6 +66,7 @@
 | [2.4-sort-duplicate.md](./2-providers/2.4-sort-duplicate.md) | 拖拽排序、复制供应商、删除 |
 | [2.5-usage-query.md](./2-providers/2.5-usage-query.md) | 用量查询、剩余额度、多套餐显示 |
 | [2.6-claude-desktop.md](./2-providers/2.6-claude-desktop.md) | Claude Desktop 第三方供应商、直连与模型映射 |
+| [2.7-kimicode-dsh.md](./2-providers/2.7-kimicode-dsh.md) | Kimi Code CLI 与 DeepSeek Harness：配置文件、供应商路由、MCP/Skills/会话 |
 
 ### 3. 扩展功能
 

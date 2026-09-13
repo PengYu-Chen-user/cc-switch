@@ -1,6 +1,6 @@
 # CC Switch User Manual
 
-> All-in-One Assistant for Claude Code / Claude Desktop / Codex / Gemini CLI / OpenCode / OpenClaw / Hermes
+> All-in-One Assistant for Claude Code / Claude Desktop / Codex / Gemini CLI / OpenCode / OpenClaw / Hermes / Kimi Code CLI / DeepSeek Harness
 
 ## Table of Contents
 
@@ -20,7 +20,8 @@ CC Switch User Manual
 │   ├── 2.3 Edit Provider
 │   ├── 2.4 Sort & Duplicate
 │   ├── 2.5 Usage Query
-│   └── 2.6 Claude Desktop
+│   ├── 2.6 Claude Desktop
+│   └── 2.7 Kimi Code CLI & DeepSeek Harness
 │
 ├── 3. Extensions
 │   ├── 3.1 MCP Server Management
@@ -65,6 +66,7 @@ CC Switch User Manual
 | [2.4-sort-duplicate.md](./2-providers/2.4-sort-duplicate.md) | Drag-to-reorder, duplicate provider, delete |
 | [2.5-usage-query.md](./2-providers/2.5-usage-query.md) | Usage query, remaining balance, multi-plan display |
 | [2.6-claude-desktop.md](./2-providers/2.6-claude-desktop.md) | Claude Desktop third-party providers, direct mode, and model mapping |
+| [2.7-kimicode-dsh.md](./2-providers/2.7-kimicode-dsh.md) | Kimi Code CLI and DeepSeek Harness: config files, provider routes, MCP/Skills/Sessions |
 
 ### 3. Extensions
 
@@ -111,6 +113,8 @@ CC Switch User Manual
 - Applicable to CC Switch v3.16.0+
 
 ### v3.16.0 Highlights
+
+- **Fork addition**: first-class **Kimi Code CLI** (`kimicode`) and **DeepSeek Harness** (`dsh`) support, switch mode + MCP/Skills/Prompts/Sessions — see [2.7 Kimi Code CLI & DeepSeek Harness](./2-providers/2.7-kimicode-dsh.md)
 
 - **Codex Chat Completions routing**: route Chat-only providers such as Baidu Qianfan, StepFun, and SiliconFlow through Codex. See [2.1 Add Provider](./2-providers/2.1-add.md)
 - **Managed CLI tool lifecycle**: install, update, update all, and diagnose Claude / Codex / Gemini / OpenCode / OpenClaw / Hermes from Settings / About. See [1.5 Personalization](./1-getting-started/1.5-settings.md)

@@ -2,7 +2,9 @@
 
 # CC Switch
 
-### Claude Code、Claude Desktop、Codex、Gemini CLI、Grok Build、OpenCode、OpenClaw 和 Hermes Agent 的全方位管理工具
+### Claude Code、Claude Desktop、Codex、Gemini CLI、Grok Build、OpenCode、OpenClaw、Hermes Agent、Kimi Code CLI 与 DeepSeek Harness 的全方位管理工具
+
+> **本分支**在上游 CC Switch 基础上新增对 **Kimi Code CLI**（`kimicode`，月之暗面）与 **DeepSeek Harness**（`dsh`，DeepSeek）的一等支持。
 
 [![Version](https://img.shields.io/github/v/release/farion1231/cc-switch?color=blue&label=version)](https://github.com/farion1231/cc-switch/releases)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/farion1231/cc-switch/releases)
@@ -208,17 +210,44 @@ TeamoRouter 还提供企业级功能，包括集中账单、团队管理、BYOK�
 
 ## 为什么选择 CC Switch？
 
-现代 AI 编程依赖于 Claude Code、Claude Desktop、Codex、Gemini CLI、Grok Build、OpenCode、OpenClaw 和 Hermes 等工具——但每个工具都有自己的配置格式。切换 API 供应商意味着手动编辑 JSON、TOML 或 `.env` 文件，而在多个工具之间缺乏一个统一管理 MCP, SKILLS 的方式。
+现代 AI 编程依赖于 Claude Code、Claude Desktop、Codex、Gemini CLI、Grok Build、OpenCode、OpenClaw、Hermes、Kimi Code CLI 和 DeepSeek Harness 等工具——但每个工具都有自己的配置格式。切换 API 供应商意味着手动编辑 JSON、TOML 或 `.env` 文件，而在多个工具之间缺乏一个统一管理 MCP, SKILLS 的方式。
 
 **CC Switch** 为你提供一个桌面应用来管理所有支持的 AI 工具。无需手动编辑配置文件，你将获得一个可视化界面，一键将供应商导入应用，一键在不同的供应商之间进行切换，内置 50+ 供应商预设、统一的 MCP, SKILLS 管理以及系统托盘即时切换功能——所有操作都基于可靠的 SQLite 数据库和原子写入机制，保护你的配置不被损坏。
 
-- **一个应用，八个工具** — 在单一界面中管理 Claude Code、Claude Desktop、Codex、Gemini CLI、Grok Build、OpenCode、OpenClaw 和 Hermes
+- **一个应用，十个工具** — 在单一界面中管理 Claude Code、Claude Desktop、Codex、Gemini CLI、Grok Build、OpenCode、OpenClaw、Hermes、Kimi Code CLI 和 DeepSeek Harness
 - **告别手动编辑** — 50+ 供应商预设，包括 AWS Bedrock、NVIDIA NIM 和社区中转服务；一键即可切换
-- **统一 MCP, SKILLS 管理** — 一个面板管理 Claude、Codex、Gemini、Grok Build、OpenCode 和 Hermes 的 MCP, SKILLS, 支持双向同步
+- **统一 MCP, SKILLS 管理** — 一个面板管理 Claude、Codex、Gemini、Grok Build、OpenCode、Hermes 和 Kimi Code 的 MCP, SKILLS, 支持双向同步
 - **系统托盘快速切换** — 从托盘菜单即时切换供应商，无需打开完整应用
 - **云同步** — 通过 Dropbox、OneDrive、iCloud 或 WebDAV 服务器在不同设备之间同步供应商数据
 - **跨平台** — 基于 Tauri 2 构建的原生桌面应用，支持 Windows、macOS 和 Linux
 - **小工具** - 内置了多种小工具来解决首次安装登录确认、禁止签名、插件拓展同步等多种功能
+
+## 本分支新增支持
+
+本分支在上游基础上扩展了两个工具，均采用**切换模式**（选中一个供应商即成为默认模型）：
+
+### Kimi Code CLI（`kimicode`）
+
+月之暗面的终端编程智能体（`kimi`，npm `@moonshot-ai/kimi-code`）。
+
+- **供应商配置**：`~/.kimi-code/config.toml`（或 `$KIMI_CODE_HOME/config.toml`）。CC Switch 写入 `[providers.<key>]` + `[models."<alias>"]` 并设置 `default_model`，采用非破坏式合并，保留 `thinking`、`loop_control` 以及 OAuth 托管的供应商。
+- **供应商类型**：`kimi`、`anthropic`、`openai`、`openai_responses`。
+- **MCP**：同步至 `~/.kimi-code/mcp.json`（`mcpServers`）。
+- **Skills / 提示词**：`~/.kimi-code/skills/`、`~/.kimi-code/AGENTS.md`。
+- **会话**：浏览/恢复 `~/.kimi-code/sessions/` 中的会话。
+
+### DeepSeek Harness（`dsh`）
+
+DeepSeek 的插件化智能体框架（`dsh`，npm `@deepseek-ai/dsh`）。
+
+- **供应商配置**：`~/.dsh/settings.yaml`（或 `$DSH_HOME/settings.yaml`）。CC Switch 写入 `llm-pi-ai.providers.<id>`，并通过 `agent-default-model` 选中。
+- **凭据**：API Key 写入 `~/.dsh/.credentials.yaml` 的 `refs.<apiKeyEnv>`；`settings.yaml` 只保存引用名。
+- **协议**：`openai-completions`、`openai-responses`、`anthropic-messages`。
+- **Skills / 提示词**：`~/.dsh/skills/`、`~/.dsh/AGENTS.md`。
+- **会话**：浏览 `~/.dsh/sessions/`（JSONL，自动识别 zstd）。
+- **MCP**：暂缓——DSH 的 MCP 依赖不稳定的 Cordis patch 结构，应用已注册但尚未投影。
+
+首次启动时会通过数据库迁移 v19 自动添加 `enabled_kimicode` / `enabled_dsh` 同步标志。
 
 ## 界面预览
 
@@ -232,7 +261,7 @@ TeamoRouter 还提供企业级功能，包括集中账单、团队管理、BYOK�
 
 ### 供应商管理
 
-- **8 个支持工具，50+ 预设** — Claude Code、Claude Desktop、Codex、Gemini CLI、Grok Build、OpenCode、OpenClaw、Hermes；复制 key 即可一键导入
+- **10 个支持工具，50+ 预设** — Claude Code、Claude Desktop、Codex、Gemini CLI、Grok Build、OpenCode、OpenClaw、Hermes、Kimi Code CLI、DeepSeek Harness；复制 key 即可一键导入
 - **通用供应商** — 一份配置同步到 Claude Code、Codex 和 Gemini CLI
 - 一键切换、系统托盘快速访问、拖拽排序、导入导出
 
@@ -243,7 +272,7 @@ TeamoRouter 还提供企业级功能，包括集中账单、团队管理、BYOK�
 
 ### MCP、Prompts 与 Skills
 
-- **统一 MCP 面板** — 管理 Claude、Codex、Gemini、Grok Build、OpenCode 和 Hermes 的 MCP 服务器，双向同步，支持 Deep Link 导入
+- **统一 MCP 面板** — 管理 Claude、Codex、Gemini、Grok Build、OpenCode、Hermes 和 Kimi Code 的 MCP 服务器，双向同步，支持 Deep Link 导入
 - **Prompts** — Markdown 编辑器，跨应用同步（CLAUDE.md / AGENTS.md / GEMINI.md），回填保护
 - **Skills** — 从 GitHub 仓库或 ZIP 文件一键安装，自定义仓库管理，支持软连接和文件复制
 
@@ -267,7 +296,7 @@ TeamoRouter 还提供企业级功能，包括集中账单、团队管理、BYOK�
 <details>
 <summary><strong>CC Switch 支持哪些 AI 工具？</strong></summary>
 
-CC Switch 支持八个工具：**Claude Code**、**Claude Desktop**、**Codex**、**Gemini CLI**、**Grok Build**、**OpenCode**、**OpenClaw** 和 **Hermes**。每个工具都有专属的供应商预设和配置管理。
+CC Switch 支持十个工具：**Claude Code**、**Claude Desktop**、**Codex**、**Gemini CLI**、**Grok Build**、**OpenCode**、**OpenClaw**、**Hermes**、**Kimi Code CLI**（`kimicode`）和 **DeepSeek Harness**（`dsh`）。每个工具都有专属的供应商预设和配置管理。
 
 </details>
 
