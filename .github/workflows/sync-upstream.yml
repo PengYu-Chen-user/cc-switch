@@ -1,0 +1,118 @@
+name: Sync upstream
+
+# Keeps this fork current with upstream farion1231/cc-switch.
+#
+# Policy:
+#   * Mirror upstream/main into this fork's main (merge; the fork keeps only
+#     the automation files on top of upstream).
+#   * Merge main back into the feature branch that carries the extra
+#     Kimi Code / DeepSeek Harness support.
+#   * PAUSE automatically (write .github/sync-upstream.paused + open an issue)
+#     when either:
+#       - a breaking upstream change is detected (merge conflict, DB schema
+#         advance, or failing post-merge checks), or
+#       - upstream/main already ships the same kimicode / dsh support.
+#   * Resume by running this workflow manually with `force: true` after the
+#     underlying issue is resolved.
+#
+# NOTE: scheduled workflows only run from the default branch, so this file must
+# live on `main`. Forks have Actions disabled by default — enable it once from
+# the repository's Actions tab.
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Force a sync even if auto-sync is paused (also clears the pause marker)"
+        type: boolean
+        default: false
+      run_backend_checks:
+        description: "Run cargo fmt/clippy/test (slower, strongest breakage signal)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+env:
+  UPSTREAM_REPO: farion1231/cc-switch
+  MAIN_BRANCH: main
+  FEATURE_BRANCH: feat/kimicode-dsh
+  # SCHEMA_VERSION at the commit this fork diverged from upstream. A later
+  # upstream bump means our DB migration (v18 -> v19) needs manual review.
+  BASE_SCHEMA_VERSION: "18"
+  FORCE: ${{ inputs.force }}
+  RUN_BACKEND_CHECKS: ${{ inputs.run_backend_checks }}
+
+jobs:
+  sync:
+    name: Sync fork with upstream
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ github.token }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Setup pnpm
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+        run: |
+          corepack enable
+          corepack install
+          pnpm --version
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-store-
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            src-tauri/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - name: Install Linux system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential pkg-config libssl-dev \
+            libgtk-3-dev librsvg2-dev libayatana-appindicator3-dev
+          sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.1-dev \
+            || sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.0-dev
+          sudo apt-get install -y --no-install-recommends libsoup-3.0-dev \
+            || sudo apt-get install -y --no-install-recommends libsoup2.4-dev
+
+      - name: Run upstream sync
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          chmod +x .github/scripts/sync-upstream.sh
+          bash .github/scripts/sync-upstream.sh

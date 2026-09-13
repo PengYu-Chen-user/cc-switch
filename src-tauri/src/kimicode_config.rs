@@ -312,12 +312,12 @@ pub fn set_mcp_servers_map(servers: &serde_json::Map<String, Value>) -> Result<(
             "Kimi Code mcp.json must be a JSON object",
         )
     })?;
-    object.insert(
-        "mcpServers".to_string(),
-        Value::Object(servers.clone()),
-    );
+    object.insert("mcpServers".to_string(), Value::Object(servers.clone()));
 
-    write_text_file(&path, &serde_json::to_string_pretty(&root).unwrap_or_default())
+    write_text_file(
+        &path,
+        &serde_json::to_string_pretty(&root).unwrap_or_default(),
+    )
 }
 
 #[cfg(test)]
@@ -364,7 +364,10 @@ mod tests {
             let path = get_kimicode_config_path();
             assert!(path.exists());
             let text = fs::read_to_string(&path).unwrap();
-            assert!(text.parse::<toml::Value>().is_ok(), "output must be valid TOML: {text}");
+            assert!(
+                text.parse::<toml::Value>().is_ok(),
+                "output must be valid TOML: {text}"
+            );
 
             let read_back = read_kimicode_live_settings().expect("read back");
             assert_eq!(read_back["providerKey"], "moonshot");
@@ -395,7 +398,10 @@ mod tests {
             write_kimicode_provider_live(&provider).expect("write live config");
 
             let text = fs::read_to_string(&path).unwrap();
-            assert!(text.contains("[thinking]"), "unrelated section preserved: {text}");
+            assert!(
+                text.contains("[thinking]"),
+                "unrelated section preserved: {text}"
+            );
             assert!(text.contains("managed"), "oauth provider preserved: {text}");
             let read_back = read_kimicode_live_settings().expect("read back");
             assert_eq!(read_back["providerKey"], "moonshot");

@@ -553,7 +553,9 @@ impl Database {
                         Self::set_user_version(conn, 18)?;
                     }
                     18 => {
-                        log::info!("迁移数据库从 v18 到 v19（Skills/MCP 添加 Kimi Code / DSH 支持）");
+                        log::info!(
+                            "迁移数据库从 v18 到 v19（Skills/MCP 添加 Kimi Code / DSH 支持）"
+                        );
                         Self::migrate_v18_to_v19(conn)?;
                         Self::set_user_version(conn, 19)?;
                     }

@@ -249,6 +249,19 @@ DeepSeek 的插件化智能体框架（`dsh`，npm `@deepseek-ai/dsh`）。
 
 首次启动时会通过数据库迁移 v19 自动添加 `enabled_kimicode` / `enabled_dsh` 同步标志。
 
+### 上游自动同步
+
+一个定时 GitHub Actions 工作流（`.github/workflows/sync-upstream.yml`）会让本 fork 持续跟进上游 `farion1231/cc-switch`：
+
+- 把 `upstream/main` 合入本仓库 `main`，再把 `main` 合入 `feat/kimicode-dsh`。
+- 在合并后的分支上运行与 CI 相同的检查（pnpm typecheck/format/单测，`cargo fmt`/`clippy -D warnings`/`test`）。
+- 满足以下任一条件时**自动暂停**（在 `main` 写入 `.github/sync-upstream.paused` 并开 issue）：
+  - 检测到**破坏性上游变更**——合并冲突、上游数据库 `SCHEMA_VERSION` 超过本 fork 基线（v18），或合并后检查失败；或
+  - **上游 `main` 已自带**同样的 `kimicode` / `dsh` 支持。
+- 问题解决后，手动运行 **Sync upstream** 工作流并勾选 `force: true` 即可恢复。
+
+> Fork 默认关闭 Actions——请先在仓库的 **Actions** 页面启用一次，定时任务才会运行。
+
 ## 界面预览
 
 |                  主界面                   |                  添加供应商                  |

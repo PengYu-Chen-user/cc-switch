@@ -23,8 +23,8 @@
 //! }
 //! ```
 
-use serde_yaml::{Mapping, Value as YamlValue};
 use serde_json::{json, Value};
+use serde_yaml::{Mapping, Value as YamlValue};
 use std::fs;
 use std::path::PathBuf;
 
@@ -273,15 +273,14 @@ pub fn write_dsh_provider_live(provider: &Provider) -> Result<(), AppError> {
             route.insert(ykey("apiKeyEnv"), YamlValue::String(api_key_env.clone()));
         }
         if !models.is_empty() {
-            let models_value = serde_yaml::to_value(&Value::Array(models.clone())).map_err(
-                |error| {
+            let models_value =
+                serde_yaml::to_value(Value::Array(models.clone())).map_err(|error| {
                     AppError::localized(
                         "provider.dsh.models.invalid",
                         format!("DeepSeek Harness 模型列表无法序列化: {error}"),
                         format!("DeepSeek Harness models could not be serialized: {error}"),
                     )
-                },
-            )?;
+                })?;
             route.insert(ykey("models"), models_value);
         }
     }
@@ -327,10 +326,7 @@ fn write_dsh_credential(api_key_env: &str, api_key: &str) -> Result<(), AppError
         }
     }
     let refs = mapping_mut(root.as_mapping_mut().expect("credentials root"), "refs");
-    refs.insert(
-        ykey(api_key_env),
-        YamlValue::String(api_key.to_string()),
-    );
+    refs.insert(ykey(api_key_env), YamlValue::String(api_key.to_string()));
 
     let text = serde_yaml::to_string(&root).map_err(|error| {
         AppError::localized(
@@ -418,7 +414,10 @@ mod tests {
             write_dsh_provider_live(&provider).expect("write live config");
 
             let text = fs::read_to_string(&path).unwrap();
-            assert!(text.contains("web-search-deepseek"), "unrelated namespace preserved");
+            assert!(
+                text.contains("web-search-deepseek"),
+                "unrelated namespace preserved"
+            );
             let read_back = read_dsh_live_settings().expect("read back");
             assert_eq!(read_back["providerId"], "moonshotai");
         });

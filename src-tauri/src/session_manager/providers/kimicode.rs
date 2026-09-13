@@ -130,8 +130,7 @@ pub fn load_messages(path: &Path) -> Result<Vec<SessionMessage>, String> {
     if !path.exists() {
         return Err(format!("Session file not found: {}", path.display()));
     }
-    let text =
-        std::fs::read_to_string(path).map_err(|e| format!("Failed to read session: {e}"))?;
+    let text = std::fs::read_to_string(path).map_err(|e| format!("Failed to read session: {e}"))?;
 
     let mut messages = Vec::new();
     for line in text.lines() {
@@ -168,9 +167,7 @@ fn message_from_wire(value: &Value) -> Option<SessionMessage> {
         .or_else(|| value.get("text"))
         .or_else(|| value.get("parts"));
 
-    let content = content_value
-        .map(|value| extract_text(value))
-        .unwrap_or_default();
+    let content = content_value.map(extract_text).unwrap_or_default();
 
     if content.trim().is_empty() {
         return None;

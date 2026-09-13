@@ -105,7 +105,11 @@ pub fn import_from_kimicode(config: &mut MultiAppConfig) -> Result<usize, AppErr
     }
 
     if !errors.is_empty() {
-        log::warn!("Kimi Code MCP 导入完成，{} 项失败: {:?}", errors.len(), errors);
+        log::warn!(
+            "Kimi Code MCP 导入完成，{} 项失败: {:?}",
+            errors.len(),
+            errors
+        );
     }
 
     Ok(changed)

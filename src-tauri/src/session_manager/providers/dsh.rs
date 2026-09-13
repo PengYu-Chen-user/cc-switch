@@ -175,9 +175,7 @@ fn message_from_log(value: &Value) -> Option<SessionMessage> {
         .or_else(|| payload.get("text"))
         .or_else(|| payload.get("parts"));
 
-    let content = content_value
-        .map(|value| extract_text(value))
-        .unwrap_or_default();
+    let content = content_value.map(extract_text).unwrap_or_default();
     if content.trim().is_empty() {
         return None;
     }
@@ -231,8 +229,8 @@ mod tests {
         let temp = tempdir().expect("tempdir");
         let path = temp.path().join("session.jsonl.zst");
         let raw = "{\"type\":\"user\",\"content\":\"compressed hi\"}\n";
-        let compressed = zstd::stream::encode_all(std::io::Cursor::new(raw.as_bytes()), 0)
-            .expect("compress");
+        let compressed =
+            zstd::stream::encode_all(std::io::Cursor::new(raw.as_bytes()), 0).expect("compress");
         std::fs::write(&path, compressed).expect("write");
 
         let messages = load_messages(&path).expect("load");

@@ -248,6 +248,19 @@ DeepSeek AI's plugin-based agent harness (`dsh`, npm `@deepseek-ai/dsh`).
 
 DB schema migration v19 adds the `enabled_kimicode` / `enabled_dsh` sync flags automatically on first launch.
 
+### Automated upstream sync
+
+A scheduled GitHub Actions workflow (`.github/workflows/sync-upstream.yml`) keeps this fork current with upstream `farion1231/cc-switch`:
+
+- Mirrors `upstream/main` into this fork's `main`, then merges `main` into `feat/kimicode-dsh`.
+- Runs the same checks as CI (pnpm typecheck/format/unit tests, `cargo fmt`/`clippy -D warnings`/`test`) on the merged branch.
+- **Pauses itself automatically** (writes `.github/sync-upstream.paused` on `main` and opens an issue) when either:
+  - a **breaking upstream change** is detected — merge conflict, upstream DB `SCHEMA_VERSION` advanced past our fork base (v18), or red post-merge checks, or
+  - **upstream/main already ships** the same `kimicode` / `dsh` support.
+- Resume by running the **Sync upstream** workflow manually with `force: true` once the issue is resolved.
+
+> Forks have Actions disabled by default — enable it once under the repository's **Actions** tab for the schedule to run.
+
 ## Screenshots
 
 |                  Main Interface                   |                  Add Provider                  |

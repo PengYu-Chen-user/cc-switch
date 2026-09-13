@@ -36,7 +36,7 @@ impl McpApps {
             AppType::Hermes => self.hermes,
             AppType::Kimicode => self.kimicode,
             AppType::Dsh => false, // DSH MCP uses an unstable patch format; not synced yet
-            AppType::Pi => false, // Pi core has no native MCP registry.
+            AppType::Pi => false,  // Pi core has no native MCP registry.
             AppType::ClaudeDesktop => false,
         }
     }
@@ -53,7 +53,7 @@ impl McpApps {
             AppType::Hermes => self.hermes = enabled,
             AppType::Kimicode => self.kimicode = enabled,
             AppType::Dsh => {} // DSH MCP not synced yet (unstable patch format)
-            AppType::Pi => {}            // Pi core has no native MCP registry.
+            AppType::Pi => {}  // Pi core has no native MCP registry.
             AppType::ClaudeDesktop => {} // Claude Desktop 3P provider config doesn't support MCP here
         }
     }
